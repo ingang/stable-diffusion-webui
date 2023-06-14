@@ -337,6 +337,7 @@ def configure_cors_middleware(app):
     app.add_middleware(CORSMiddleware, **cors_options)
 
 
+
 def create_api(app):
     from modules.api.api import Api
     api = Api(app, queue_lock)
@@ -354,7 +355,7 @@ def api_only():
 
     print(f"Startup time: {startup_timer.summary()}.")
     api.launch(server_name="0.0.0.0" if cmd_opts.listen else "127.0.0.1", port=cmd_opts.port if cmd_opts.port else 7861)
-
+    
 
 def stop_route(request):
     shared.state.server_command = "stop"
@@ -405,6 +406,14 @@ def webui():
             prevent_thread_lock=True,
             allowed_paths=cmd_opts.gradio_allowed_path,
         )
+
+        # Add the index.html route
+        def index():
+            with open("html/index.html", "r") as f :
+                content = f.read()
+            return Response(content, media_type="text/html")
+
+
         if cmd_opts.add_stop_route:
             app.add_route("/_stop", stop_route, methods=["POST"])
 
